@@ -1,54 +1,92 @@
-<html>
+<html lang="en">
   <head>
-  <!--  <script>
-      (function() {
-        var theme = localStorage.getItem("theme") || (window.matchMedia("(prefers-color-scheme:light)").matches ? "light" : "dark");
-        var themeIcon = document.getElementById("theme-icon");
-        if (theme==="light") {
-          document.documentElement.classList.add("light");
-          themeIcon.innerHTML = "dark_mode";
-          console.log("Light Theme");
-        } else {
-          document.documentElement.classList.add("dark");
-          themeIcon.innerHTML = "light_mode";
-          console.log("Dark Theme");
-        }
-      })();
-    </script> -->
+    <meta charset="UTF-8" />
+   
+    <meta name="author" content="Piyush" />
+    <meta name="description" content="All 16M colors" />
+    <title>Colors</title>
     <link rel="stylesheet" href="css/index.css" />
+    <script src="js/index.js" defer></script>
     <!--Google Api for Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fleur+De+Leah&family=IBM+Plex+Serif:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;1,100;1,200;1,300;1,400;1,500;1,600;1,700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
   </head>
   
   
   <body>
     
     <header>
-      <nav>
-        <h1 id="icon">Colours</h1>
-        <div id="theme-icon" class="material-symbols-outlined" onclick ="toggleTheme()">light_mode</div>
+      <nav id="top-nav">
+        <h1 id="title">Colours</h1>
+        <div>
+          <div id="theme-icon" class="material-symbols-outlined" onclick ="toggleTheme()">light_mode</div>
+          <div id="bookmark-icon" class="material-symbols-outlined" onclick="toggleBookmark()">bookmark</div>
+        </div>
       </nav>
     </header>
     
+    <header>
+      <nav id="bottom-nav">
+        <div id="dashboard-icon" class="material-symbols-outlined bottom-icon" onclick="bottomIcon(this); dashboardIcon();">dashboard</div>
+        <div id="text-format-icon" class="material-symbols-outlined bottom-icon" onclick="bottomIcon(this); textFormatIcon();">text_format</div>
+        <div id="main-icon" class="material-symbols-outlined bottom-icon" onclick="bottomIcon(this)">deployed_code</div>
+        <div id="search-icon" class="material-symbols-outlined bottom-icon" onclick="bottomIcon(this); searchIcon();">search</div>
+        <div id="menu-icon" class="material-symbols-outlined bottom-icon" onclick="bottomIcon(this)">menu</div>
+      </nav>
+    </header>
     
+    <!-- Color Cards -->
     <section>
       <div id="container"></div>
     </section>
     
     
+    <!-- Color Modal -->
     <section>
       <div id="color-modal" class="hidden">
-        <div id="color-modal-content">Hello</div>
+        <div id="color-modal-content">
+          <div id="modal-content-close" class="material-symbols-outlined" onclick="modalclose()">close</div>
+          <div class="color-card-main">
+            <div class="color-card-display">
+              <div id="update-bookmark-icon" class="material-symbols-outlined" onclick="updateBookmarkArray(this,getComputedStyle(this.closest('.color-card-display')).backgroundColor)" >bookmark_add</div>
+            </div>
+            <div class="color-card-hex"  onclick = "copyText(this)"></div>
+            <div class="color-card-rgb" onclick = "copyText(this)"></div>
+            <div id="color-card-slider-label">Opacity:
+            <span id="color-card-slider-display" contenteditable="true" inputmode="numeric">100</span></div>
+            <input type="range" id="color-card-slider" min="0" max="100" step="1" value="100">
+          </div>
+          <div class="color-card-other"></div>
+        </div>
       </div>
     </section>
     
+    
+    <!-- Back to Top -->
     <aside>
       <div id="back-to-top" class="material-symbols-outlined" title="Back To Top">arrow_upward</div>
     </aside>
     
+    
+    <!-- Bookmark -->
+    <aside>
+      <div id="bookmark-modal">
+        <div id="bookmark">
+        </div>
+      </div>
+    </aside>
+    
+    
+    <!-- Search Bar -->
+    <section id="search-modal" class="hidden">
+      <div>
+        <input type="search"  id="search-box" placeholder="Search" oninput="searching(this.value, displaySearchSuggestionText)">
+      </div>
+      <div id="search-suggestion-box" class="hidden"></div>
+    </section>
+    
   </body>
-  <script src="js/index.js"></script>
 </html>
+
