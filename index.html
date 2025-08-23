@@ -1,9 +1,15 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-   
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="author" content="Piyush" />
     <meta name="description" content="All 16M colors" />
+    <meta name="keywords" content="color picker, hex, rgb, hsl, 16 million colors, color explorer">
+    <meta property="og:title" content="Explore 16M Colors">
+    <meta property="og:description" content="Interactive color explorer with HEX, RGB, HSL conversions, search, bookmarks, color names and all 16M colors.">
+    <meta property="og:image" content="preview.png">
+    <meta property="og:type" content="website">
+    <meta name="twitter:card" content="summary_large_image">
     <title>Colors</title>
     <link rel="stylesheet" href="css/index.css" />
     <script src="js/index.js" defer></script>
@@ -31,15 +37,48 @@
       <nav id="bottom-nav">
         <div id="dashboard-icon" class="material-symbols-outlined bottom-icon" onclick="bottomIcon(this); dashboardIcon();">dashboard</div>
         <div id="text-format-icon" class="material-symbols-outlined bottom-icon" onclick="bottomIcon(this); textFormatIcon();">text_format</div>
-        <div id="main-icon" class="material-symbols-outlined bottom-icon" onclick="bottomIcon(this)">deployed_code</div>
+        <div id="main-icon" class="material-symbols-outlined bottom-icon" onclick="bottomIcon(this); mainIcon();">deployed_code</div>
         <div id="search-icon" class="material-symbols-outlined bottom-icon" onclick="bottomIcon(this); searchIcon();">search</div>
         <div id="menu-icon" class="material-symbols-outlined bottom-icon" onclick="bottomIcon(this)">menu</div>
       </nav>
     </header>
-    
+  
     <!-- Color Cards -->
     <section>
+      <div id="grid-head"></div>
+      <div id="grid-para"></div>
+      <div id="grid-toolbar" class="hidden">
+        <div id="similar">
+          <span class="material-symbols-outlined">blur_on</span>
+          <span>Similar</span>
+          <div id="similar-options">
+            <label for="similar-radius">
+              Radius
+              <input id="similar-radius" type="number" placeholder="20" value="20">
+            </label>
+            <label for="similar-step">
+              Step
+              <input id="similar-step" type="number" placeholder="5" value="5">
+            </label>
+            <label for="similar-limit">
+              Limit
+              <input id="similar-limit" type="number" placeholder="50" value="50">
+            </label>
+            <button id="similar-button">Generate</button>
+          </div>
+        </div>
+        <div id="sort">
+          <span class="material-symbols-outlined">sort</span>
+          <span>Sort</span>
+          <div id="sort-options">
+            <div data-value="name">Name</div>
+            <div data-value="lightness">Lightness</div>
+            <div data-value="group">Group</div>
+          </div>
+        </div>
+      </div>
       <div id="container"></div>
+      <div id="grid-bottom"></div>
     </section>
     
     
@@ -51,11 +90,12 @@
           <div class="color-card-main">
             <div class="color-card-display">
               <div id="update-bookmark-icon" class="material-symbols-outlined" onclick="updateBookmarkArray(this,getComputedStyle(this.closest('.color-card-display')).backgroundColor)" >bookmark_add</div>
+              <div class="color-card-name" onclick="copyText(this, this.textContent)"></div>
             </div>
-            <div class="color-card-hex"  onclick = "copyText(this)"></div>
-            <div class="color-card-rgb" onclick = "copyText(this)"></div>
+            <div class="color-card-hex"  onclick = "copyText(this, this.textContent.toLowerCase())"></div>
+            <div class="color-card-rgb" onclick = "copyText(this, this.textContent)"></div>
             <div id="color-card-slider-label">Opacity:
-            <span id="color-card-slider-display" contenteditable="true" inputmode="numeric">100</span></div>
+            <span id="color-card-slider-display" contenteditable="true" inputmode="numeric">100</span>%</div>
             <input type="range" id="color-card-slider" min="0" max="100" step="1" value="100">
           </div>
           <div class="color-card-other"></div>
@@ -82,11 +122,111 @@
     <!-- Search Bar -->
     <section id="search-modal" class="hidden">
       <div>
-        <input type="search"  id="search-box" placeholder="Search" oninput="searching(this.value, displaySearchSuggestionText)">
+        <input type="search"  id="search-box" placeholder="Search" oninput="debounceSearch(this.value, displaySearchSuggestionText)">
       </div>
       <div id="search-suggestion-box" class="hidden"></div>
     </section>
     
+    
+    <!-- Main Page -->
+    <section id="main-page" class="hidden">
+      <div class="input-div">
+        <span>Name</span>
+        <input type="search" id="name-input" placeholder="name" class="input-box" oninput="convert(this.id, this.value)">
+        <span class="material-symbols-outlined" onclick="copyText(null, document.getElementById('name-input').value)">content_copy</span>
+      </div>
+      <div class="input-div">
+        <span>Hex</span>
+        <input type="search" id="hex-input" class="input-box" placeholder="121212" value="#" oninput="convert(this.id, this.value)">
+        <span class="material-symbols-outlined" onclick="copyText(null, document.getElementById('hex-input').value.toLowerCase())">content_copy</span>
+      </div>
+      <div class="input-div">
+        <span>Rgb</span>
+        <input type="search" id="rgb-input" class="input-box" placeholder="12, 12, 12" value="rgb" oninput="convert(this.id, this.value)">
+        <span class="material-symbols-outlined" onclick="copyText(null, document.getElementById('rgb-input').value.toLowerCase())">content_copy</span>
+      </div>
+      <div class="input-div">
+        <span>Hsl</span>
+        <input type="search" id="hsl-input" class="input-box" placeholder="12, 12, 12" value="hsl" oninput="convert(this.id, this.value)">
+        <span class="material-symbols-outlined" onclick="copyText(null, document.getElementById('hsl-input').value.toLowerCase())">content_copy</span>
+      </div>
+      <div class="input-div">
+        <input type="color" id="color-input" oninput="convert(this.id, this.value)">
+      </div>
+      <div class="output-div">
+        <div id="color-output">
+          <div class="material-symbols-outlined" onclick="updateBookmarkArray(this,getComputedStyle(this.closest('#color-output')).backgroundColor)" >bookmark_add</div>
+        </div>
+      </div>
+      <div class="input-div">
+        <span>Red</span>
+        <input id="red-slider" class="slider" type="range" min="0" max="255" oninput="convert(this.id, this.value)">
+        <span class="material-symbols-outlined slider-btn" data-slider="red-slider" data-step="1">stat_1</span>
+        <span class="material-symbols-outlined slider-btn" data-slider="red-slider" data-step="-1">stat_minus_1</span>
+      </div>
+      <div class="input-div">
+        <span>Green</span>
+        <input id="green-slider" class="slider" type="range" min="0" max="255" oninput="convert(this.id, this.value)">
+        <span class="material-symbols-outlined slider-btn" data-slider="green-slider" data-step="1">stat_1</span>
+        <span class="material-symbols-outlined slider-btn" data-slider="green-slider" data-step="-1">stat_minus_1</span>
+      </div>
+      <div class="input-div">
+        <span>Blue</span>
+        <input id="blue-slider" class="slider" type="range" min="0" max="255" oninput="convert(this.id, this.value)">
+        <span class="material-symbols-outlined slider-btn" data-slider="blue-slider" data-step="1">stat_1</span>
+        <span class="material-symbols-outlined slider-btn" data-slider="blue-slider" data-step="-1">stat_minus_1</span>
+      </div>
+      <div class="palette-div">
+        <p>UI Theme Preview</p>
+        <div id="theme-color-output"></div>
+      </div>
+      <div class="palette-div">
+        <p>Monochrome</p>
+        <div id="monochrome-color-output"></div>
+      </div>
+      <div class="palette-div">
+        <p>Complementary</p>
+        <div id="complementary-color-output"></div>
+      </div>
+      <div class="palette-div">
+        <p>Analogous</p>
+        <div id="analogous-color-output"></div>
+      </div>
+      <div class="palette-div">
+        <p>Triadic</p>
+        <div id="triadic-color-output"></div>
+      </div>
+      <div class="palette-div">
+        <p>Tetradic</p>
+        <div id="tetradic-color-output"></div>
+      </div>
+      <div class="palette-div">
+        <p>Shades-Tints-Tones</p>
+        <div id="stt-color-output"></div>
+      </div>
+      <div class="palette-div">
+        <p>Similar</p>
+        <div id="aesthetic-color-output"></div>
+      </div>
+    </section>
+    
+    
+    <!-- Footer -->
+    <footer>
+      <svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 150 1300 200" class="wave-svg">
+        <path class="st1 path1" d="M 0 250 C 600 450 650 100 1300 250 L 1300 550 L 0 550 L 0 250"></path>
+        <path class="st1 path2" d="M 0 250 C 600 100 650 450 1300 250 L 1300 550 L 0 550 L 0 250"></path>
+        <path class="st1 path3" d="M 0 250 C 950 350 950 150 1300 250 L 1300 550 L 0 550 L 0 250"></path>
+        <path class="st1 path4" d="M 0 250 C 350 150 350 350 1300 250 L 1300 550 L 0 550 L 0 250"></path>
+      </svg>
+      <div id="footer-text">
+        <span>Designed & developed by Piyush Kumar Singh</span>
+        <span>© 2025 Powered by tints & tones</span>
+      </div>
+    </footer>
   </body>
 </html>
 
+<!-- Storage 
+Add colour blindness simulation so that user could check how the colour appears to different persons with different disability
+-->
